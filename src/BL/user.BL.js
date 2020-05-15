@@ -8,7 +8,8 @@ import User from '../Modal/user-modal';
  * ....................................................................
  */
 export const addRole = async (payload) => {
-    await Role.add(payload);
+    let result = await Role.add(payload);
+    return result;
 }
 
 
@@ -26,10 +27,11 @@ export const registerUser = async (payload) => {
         { $count: "userCount" }
     ]);
     let id;
+    console.log(result);
     if (result.length === 0 || result.userCount === 0) {
         id = await getRoleId('admin');
     } else {
-        id = await getRoleId('employee')
+        id = await getRoleId('employee');
     }
     payload.role = id;
     await User.add(payload);
@@ -45,7 +47,10 @@ export const getRoleId = async (role) => {
         let roleData = await Role.findOne({ 'name': role }, { _id: 1 });
         if (roleData) {
             return roleData._id
-        } else throw new Error('Unable to assign the role')
+        } else{
+           let roleData = await addRole({"name":role});
+           return roleData._id;
+        }
     } catch (error) {
         throw new Error('Unable to get Role')
     }
